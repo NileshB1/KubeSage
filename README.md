@@ -6,8 +6,8 @@ This repository contains my MSc research project demonstrating an end-to-end Ret
 KubeSage uses historical incident context from a persistent vector store (ChromaDB) to ground a lightweight local Large Language Model (SmolLM2-1.7B-Instruct) in generating structured post-mortem reports.
 
 ## Staged Development Checklist
-- **1:** Core Scaffolding & FastAPI API Skeleton (Completed)
-- **2:** Synthetic Kubernetes Incidents Generator (Completed)
+- **1:** Core Scaffolding & FastAPI API Skeleton Done
+- **2:** Synthetic Kubernetes Incidents Generator : DOne
 - **3:** Text Preprocessing & Cleaning pipeline (Next)
 - **4:** Sentence-Transformers Embedding Engine
 - **5:** Persistent Vector Store (ChromaDB Integration)
