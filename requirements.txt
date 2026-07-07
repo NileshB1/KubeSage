@@ -1,0 +1,81 @@
+# =============================================================================
+# KubeSage — Pinned Python dependencies
+# =============================================================================
+# Mirrors the inline `pip install` list in README.md (Step 2).
+#
+# Quick start:
+#     python -m venv .venv && source .venv/bin/activate
+#     pip install --upgrade pip
+#     pip install -r requirements.txt
+#
+# Style:
+#     `>=X,<Ma.Y` — minimum pin for reproducibility, ceiling to block breaking
+#                   major bumps. Patch/minor updates are received automatically.
+# Tested on Python 3.10 / 3.11.
+# =============================================================================
+
+# ---- Core scientific stack -----------------------------------------------
+numpy>=1.24,<2.0                # ChromaDB wheels still fragile with numpy 2.x
+pandas>=2.0,<3.0
+
+# ---- Backend (FastAPI + Pydantic v2) --------------------------------------
+fastapi>=0.110,<1.0
+uvicorn[standard]>=0.27,<1.0    # [standard] pulls httptools, uvloop, websockets
+pydantic>=2.5,<3.0
+pydantic-settings>=2.1,<3.0
+python-multipart>=0.0.12        # Form/File uploads; >=0.0.12 better w/ pydantic v2
+
+# ---- Frontend (Streamlit + Plotly) ----------------------------------------
+streamlit>=1.30,<2.0           # width="stretch" introduced in 1.27
+plotly>=5.18,<6.0
+matplotlib>=3.7,<4.0           # required for pandas background_gradient styling
+
+# ---- Vector database + embeddings ----------------------------------------
+chromadb>=0.4.22,<0.6.0        # pin under 0.6 to avoid 0.5→1.x breaking API churn
+sentence-transformers>=2.6,<3.0
+
+# ---- LLM (HuggingFace) ----------------------------------------------------
+# SmolLM2-1.7B-Instruct (default). Alternatives: Qwen2.5-1.5B/3B, Phi-3, Llama-3
+# Default install is the CPU wheel — works out of the box.
+# For GPU/CUDA, replace `torch` after install:
+#     pip install --upgrade torch --index-url https://download.pytorch.org/whl/cu121
+##transformers>=4.41,<5.0
+transformers==4.55.3
+safetensors>=0.4.3
+accelerate>=0.27,<1.0           # device_map='auto', CPU offloading
+##torch>=2.0,<3.0
+##torch==2.3.1
+
+# ---- ML evaluation utilities ---------------------------------------------
+scikit-learn>=1.3,<2.0          # classification_report, accuracy, f1, etc.
+nltk>=3.8,<4.0                  # tokenizer used by GenerationMetrics BLEU/ROUGE
+
+# ---- Database (PostgreSQL) -----------------------------------------------
+psycopg2-binary>=2.9,<3.0       # binary wheel; no libpq build needed
+
+# ---- HTTP client + logging + reporting -----------------------------------
+httpx>=0.27,<1.0                # FastAPI TestClient + async outbound calls
+loguru>=0.7,<1.0                # structured logging used by backend/logging_config.py
+reportlab>=4.0,<5.0             # optional PDF export of investigation reports
+
+# =============================================================================
+# NLTK runtime data (NOT pip-installed)
+# =============================================================================
+# After `pip install -r requirements.txt`, run ONCE to fetch NLTK tokenizer data:
+#     python -m nltk.downloader punkt_tab
+# (also: `punkt` for backward compat if your NLTK < 3.8.2)
+# GenerationMetrics.compute_bleu and compute_rouge_l will raise LookupError
+# without this step on a fresh venv.
+
+# =============================================================================
+# Development / testing
+# =============================================================================
+pytest>=7.4,<9.0                # tests/ contains 41 RAG pipeline tests
+pytest-cov>=4.1,<6.0            # coverage reports (`pytest --cov=.`)
+
+# ---- Optional lint/format -------------------------------------------------
+# Uncomment if your team uses these:
+# ruff>=0.3,<1.0
+# black>=24.3,<25.0
+# mypy>=1.8,<2.0
+# pandas-stubs

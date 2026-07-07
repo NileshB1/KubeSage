@@ -1,0 +1,52 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+*.egg
+
+# IDE / editors
+.idea/
+.vscode/
+*.swp
+.DS_Store
+
+# Jupyter notebooks
+.ipynb_checkpoints/
+
+# pytest
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Logs (Streamlit startup logs go here)
+logs/
+*.log
+
+# Local env files
+.env
+.env.local
+.env.*.local
+
+# Model weights / transient caches (kept under vector_db/chroma_store which IS tracked;
+# only transient in-memory caches like nltk_data/downloads are excluded)
+nltk_data/
+.cache/
+
+# Tmp / debug probes
+/tmp/
+
+# Backups
+vector_db/chroma_store_backup/

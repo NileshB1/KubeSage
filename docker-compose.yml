@@ -1,0 +1,68 @@
+# KubeSage Docker Compose Configuration
+# ======================================
+
+version: "3.8"
+
+services:
+  # Python backend + RAG pipeline
+  backend:
+    build: .
+    container_name: kubesage-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=kubesage
+      - POSTGRES_USER=kubesage
+      - POSTGRES_PASSWORD=kubesage
+      - EMBEDDING_DEVICE=cpu
+    volumes:
+      - ./data:/app/data
+      - ./embeddings:/app/embeddings
+      - ./vector_db:/app/vector_db
+      - ./results:/app/results
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Streamlit frontend
+  frontend:
+    build: .
+    container_name: kubesage-frontend
+    command: streamlit run frontend/app.py --server.port 8501 --server.address 0.0.0.0
+    ports:
+      - "8501:8501"
+    environment:
+      - API_URL=http://backend:8000
+    depends_on:
+      - backend
+    volumes:
+      - ./data:/app/data
+      - ./embeddings:/app/embeddings
+      - ./vector_db:/app/vector_db
+      - ./results:/app/results
+    restart: unless-stopped
+
+  # PostgreSQL database
+  postgres:
+    image: postgres:15-alpine
+    container_name: kubesage-postgres
+    environment:
+      - POSTGRES_DB=kubesage
+      - POSTGRES_USER=kubesage
+      - POSTGRES_PASSWORD=kubesage
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kubesage"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
