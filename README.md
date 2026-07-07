@@ -6,10 +6,10 @@ This repository contains my MSc research project demonstrating an end-to-end Ret
 KubeSage uses historical incident context from a persistent vector store (ChromaDB) to ground a lightweight local Large Language Model (SmolLM2-1.7B-Instruct) in generating structured post-mortem reports.
 
 ## Staged Development Checklist
-- **1:** Core Scaffolding & FastAPI API Skeleton Done
-- **2:** Synthetic Kubernetes Incidents Generator : DOne
-- **3:** Text Preprocessing & Cleaning pipeline (Next)
-- **4:** Sentence-Transformers Embedding Engine
+- **1:** Core Scaffolding & FastAPI API Skeleton (Completed)
+- **2:** Synthetic Kubernetes Incidents Generator (Completed)
+- **3:** Text Preprocessing & Cleaning pipeline (Completed)
+- **4:** Sentence-Transformers Embedding Engine (Next)
 - **5:** Persistent Vector Store (ChromaDB Integration)
 - **6:** Local LLM Inference Wrapper
 - **7:** RAG Pipeline Orchestrator
@@ -33,4 +33,17 @@ This stage includes the synthetic generator engine that seeds the RAG pipeline w
 To generate the dataset:
 ```bash
 python data/generate_synthetic.py --num-incidents 500 --output data/synthetic_incidents.json
+```
+
+---
+
+## 3: Text Preprocessing & Cleaning Pipeline
+This stage focuses on formatting and cleaning the unstructured Kubernetes log data and raw descriptions:
+- `data/preprocess.py`: Contains the `IncidentPreprocessor` class which cleans logs (removes timestamps, anonymizes IPs and hex container IDs), splits long entries into chunks, and runs categorical label encoding for severity/type.
+- `tests/test_preprocessor.py`: Unit tests verifying the log cleaning, normalization, and label encoding logic.
+
+### Running Tests
+To verify the preprocessor behavior:
+```bash
+pytest tests/test_preprocessor.py -v
 ```
