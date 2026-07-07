@@ -6,11 +6,11 @@ This repository contains my MSc research project demonstrating an end-to-end Ret
 KubeSage uses historical incident context from a persistent vector store (ChromaDB) to ground a lightweight local Large Language Model (SmolLM2-1.7B-Instruct) in generating structured post-mortem reports.
 
 ## Staged Development Checklist
-- **1:** Core Scaffolding & FastAPI API Skeleton (Completed)
-- **2:** Synthetic Kubernetes Incidents Generator (Completed)
-- **3:** Text Preprocessing & Cleaning pipeline (Completed)
-- **4:** Sentence-Transformers Embedding Engine (Next)
-- **5:** Persistent Vector Store (ChromaDB Integration)
+- **1:** Core Scaffolding & FastAPI API Skeleton: Done
+- **2:** Synthetic Kubernetes Incidents Generator: Done
+- **3:** Text Preprocessing & Cleaning pipeline: Done
+- **4:** Sentence-Transformers Embedding Engine: Done
+- **5:** Persistent Vector Store (ChromaDB Integration) (Next)
 - **6:** Local LLM Inference Wrapper
 - **7:** RAG Pipeline Orchestrator
 - **8:** Interactive Streamlit Dashboard Frontend
@@ -46,4 +46,19 @@ This stage focuses on formatting and cleaning the unstructured Kubernetes log da
 To verify the preprocessor behavior:
 ```bash
 pytest tests/test_preprocessor.py -v
+```
+
+---
+
+## 4: Sentence-Transformers Embedding Engine
+This stage implements the vector encoding engine using SBERT:
+- `embeddings/generate_embeddings.py`: Wraps `sentence-transformers` models to generate dense numeric vectors from cleaned incident texts. Defaults to `all-MiniLM-L6-v2` (384 dimensions) but supports larger models.
+- `embeddings/incident_embeddings.json` & `embeddings/incident_embeddings.npy`: Serialized embeddings files storing the vectors computed over the 500 incidents.
+
+### Execution
+To compute embeddings over the generated incidents:
+```bash
+python embeddings/generate_embeddings.py \
+    --input data/synthetic_incidents.json \
+    --output embeddings/incident_embeddings.npy
 ```
