@@ -1,5 +1,4 @@
-# KubeSage Docker Compose Configuration
-# ======================================
+# KubeSage Docker Compos
 
 version: "3.8"
 
@@ -17,6 +16,7 @@ services:
       - POSTGRES_USER=kubesage
       - POSTGRES_PASSWORD=kubesage
       - EMBEDDING_DEVICE=cpu
+      
     volumes:
       - ./data:/app/data
       - ./embeddings:/app/embeddings
