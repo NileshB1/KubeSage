@@ -1,8 +1,6 @@
 """
-KubeSage FastAPI REST API
-=========================
 FastAPI application exposing endpoints for RAG pipeline queries,
-semantic database search, Postgres incident logs, and evaluation metrics.
+semantic database search, Postgres incident logs, and evaluation metrics
 """
 
 from contextlib import asynccontextmanager
@@ -15,12 +13,12 @@ from pydantic import BaseModel, Field
 from backend.config import settings
 from backend.logging_config import get_logger
 
+
 logger = get_logger(__name__)
 
 
-# ---------------------------------------------------------------------------
+
 # Pydantic Models
-# ---------------------------------------------------------------------------
 
 class InvestigateRequest(BaseModel):
     """Request body for incident investigation."""
@@ -32,9 +30,10 @@ class InvestigateRequest(BaseModel):
                 "Logs show: 'Error: connection refused' to PostgreSQL at 10.0.2.15:5432. "
                 "The database pod is running but max_connections has been reached.",
     )
-    top_k: int = Field(default=5, ge=1, le=20, description="Number of similar incidents to retrieve")
-    llm_provider: str | None = Field(default=None, description="Override default LLM provider")
-    rag_enabled: bool = Field(default=True, description="Enable/disable RAG")
+
+    top_k: int = Field(default=5, ge=1, le=20, description="number of similar incidents to retrieve")
+    llm_provider: str | None = Field(default=None, description="can override default llm provider")
+    rag_enabled: bool = Field(default=True, description="enable or disable RAG")
 
 
 class InvestigateResponse(BaseModel):
@@ -52,36 +51,33 @@ class SearchRequest(BaseModel):
     top_k: int = Field(default=5, ge=1, le=20)
 
 
-# ---------------------------------------------------------------------------
 # Application Lifespan
-# ---------------------------------------------------------------------------
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application startup and shutdown events."""
-    logger.info("=" * 50)
-    logger.info("🚀 KubeSage API Starting...")
-    logger.info(f"   Host: {settings.API_HOST}:{settings.API_PORT}")
-    logger.info(f"   Embedding Model: {settings.EMBEDDING_MODEL_NAME}")
-    logger.info(f"   LLM Provider: {settings.LLM_PROVIDER}")
-    logger.info(f"   RAG Enabled: {settings.RAG_ENABLED}")
-    logger.info("=" * 50)
+    logger.info("=" * 40)
+    logger.info("KubeSage API Starting...")
+    logger.info(f"Host: {settings.API_HOST}:{settings.API_PORT}, Embedding Model: {settings.EMBEDDING_MODEL_NAME}")
+    logger.info(f"   LLM Provider: {settings.LLM_PROVIDER}, RAG Enabled: {settings.RAG_ENABLED}")
+    logger.info("=" * 45)
     yield
-    logger.info("👋 KubeSage API Shutting down...")
+    logger.info("Application is shutting down....Ha ha")
 
 
-# ---------------------------------------------------------------------------
+
 # FastAPI App
-# ---------------------------------------------------------------------------
+
 
 app = FastAPI(
     title="KubeSage API",
-    description="RAG-powered Kubernetes Incident Investigation System",
+    description="Kubernetes incident investigation system backed by RAG",
     version="1.0.0",
     docs_url="/docs",
     redoc_url="/redoc",
     lifespan=lifespan,
 )
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -92,99 +88,86 @@ app.add_middleware(
 )
 
 
-# ---------------------------------------------------------------------------
-# Health Check
-# ---------------------------------------------------------------------------
+
+# Health checking
+
 
 @app.get("/", tags=["Health"])
 async def root() -> dict[str, str]:
-    """Health check endpoint."""
+    """health check endpoint."""
     return {
-        "status": "healthy",
-        "service": "KubeSage API",
+        "status": "healthy","service": "KubeSage API",
         "version": "1.0.0",
     }
 
 
 @app.get("/api/v1/health", tags=["Health"])
 async def health_check() -> dict[str, Any]:
-    """Detailed health check with configuration info."""
+    """health check with configuration info."""
     return {
-        "status": "healthy",
-        "rag_enabled": settings.RAG_ENABLED,
+        "status": "healthy",     "rag_enabled": settings.RAG_ENABLED,
         "embedding_model": settings.EMBEDDING_MODEL_NAME,
-        "llm_provider": settings.LLM_PROVIDER,
-        "vector_db": settings.CHROMA_COLLECTION_NAME,
+        "llm_provider": settings.LLM_PROVIDER,     "vector_db": settings.CHROMA_COLLECTION_NAME,
     }
 
 
-# ---------------------------------------------------------------------------
+
 # Incident Endpoints
-# ---------------------------------------------------------------------------
+
 
 @app.get("/api/v1/incidents", tags=["Incidents"])
 async def list_incidents(
     severity: str | None = None,
     incident_type: str | None = None,
-    limit: int = 50,
-    offset: int = 0,
+    limit: int = 50,  offset: int = 0,
 ) -> dict[str, Any]:
-    """List all incidents with optional filtering by severity and type."""
+    """list down all incidents """
     return {
-        "incidents": [],
-        "total": 0,
-        "limit": limit,
-        "offset": offset,
-        "message": "Database not connected — using in-memory/vector store mode",
+        "incidents": [],   "total": 0,
+        "limit": limit, "offset": offset,
+        "message": "DB not connected.....",
     }
 
 
 @app.get("/api/v1/incidents/{incident_id}", tags=["Incidents"])
 async def get_incident(incident_id: str) -> dict[str, Any]:
-    """Get a single incident by ID."""
+    """get a single incident by ID."""
     return {"incident_id": incident_id, "message": "Not yet implemented"}
 
 
-# ---------------------------------------------------------------------------
+
 # Investigation (RAG Pipeline)
-# ---------------------------------------------------------------------------
+
 
 @app.post("/api/v1/investigate", response_model=InvestigateResponse, tags=["Investigation"])
 async def investigate_incident(request: InvestigateRequest) -> InvestigateResponse:
-    """Run the full RAG pipeline on a given incident description."""
-    logger.info(f"Investigate request received (rag={request.rag_enabled}, k={request.top_k})")
+    """Run the full RAG pipeline here"""
+    logger.info(f"investigate request received (rag={request.rag_enabled}, k={request.top_k})")
 
     return InvestigateResponse(
         report={
-            "incident_id": "INC-PENDING",
-            "severity": "Unknown",
-            "root_cause": "Pending analysis",
-            "summary": "RAG pipeline not yet initialized. Complete Phase 4-5 setup.",
+            "incident_id": "INC-PENDING", "severity": "Unknown",
+            "root_cause": "Pending analysis",    "summary": "RAG pipeline not initialized",
         },
-        retrieved_incidents=[],
-        confidence_score=0.0,
-        rag_enabled=request.rag_enabled,
-        processing_time_ms=0.0,
+        retrieved_incidents=[],        confidence_score=0.0,
+        rag_enabled=request.rag_enabled, processing_time_ms=0.0,
     )
 
 
-# ---------------------------------------------------------------------------
+
 # Semantic Search
-# ---------------------------------------------------------------------------
 
 @app.post("/api/v1/search", tags=["Search"])
 async def semantic_search(request: SearchRequest) -> dict[str, Any]:
     """Perform semantic search over the incident vector database."""
     return {
-        "query": request.query,
-        "results": [],
-        "message": "Vector database not yet initialized",
+        "query": request.query,  "results": [],
+        "message": "Vector database not initialized",
     }
 
 
-# ---------------------------------------------------------------------------
+
 # Evaluation Endpoints
-# ---------------------------------------------------------------------------
 
 @app.get("/api/v1/eval/metrics", tags=["Evaluation"])
 async def get_evaluation_metrics(
@@ -192,19 +175,17 @@ async def get_evaluation_metrics(
 ) -> dict[str, Any]:
     """Get evaluation metrics for a specific experiment or all experiments."""
     return {
-        "experiments": [],
-        "message": "No experiments run yet — run evaluation scripts in Phase 7",
+        "experiments": [],    "message": "No experiments run yet",
     }
 
 
-# ---------------------------------------------------------------------------
+# main method
 
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(
-        "backend.main:app",
-        host=settings.API_HOST,
-        port=settings.API_PORT,
-        reload=True,
+        "backend.main:app",   host=settings.API_HOST,
+        port=settings.API_PORT,reload=True,
         log_level=settings.LOG_LEVEL.lower(),
     )
+
