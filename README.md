@@ -11,8 +11,8 @@ KubeSage uses historical incident context from a persistent vector store (Chroma
 - **3:** Text Preprocessing & Cleaning pipeline: Done
 - **4:** Sentence-Transformers Embedding Engine: Done
 - **5:** Persistent Vector Store (ChromaDB Integration): Done
-- **6:** Local LLM Inference Wrapper (Next)
-- **7:** RAG Pipeline Orchestrator
+- **6:** Local LLM Inference Wrapper: Done
+- **7:** RAG Pipeline Orchestrator (Next)
 - **8:** Interactive Streamlit Dashboard Frontend
 - **9:** Evaluation Metrics & Performance Benchmarks
 
@@ -78,3 +78,9 @@ python -m vector_db.build_index \
     --incidents data/synthetic_incidents.json \
     --model all-MiniLM-L6-v2
 ```
+
+---
+
+## 6: Local LLM Inference Wrapper
+This stage implements the local LLM inference manager to execute lightweight, open-weight instruction models on CPU:
+- `models/llm_inference.py`: Wraps HuggingFace transformers (`AutoModelForCausalLM` and `AutoTokenizer`) to load and query target models (e.g. `SmolLM2-1.7B-Instruct`). Features memory-optimized CPU float16 configuration fallback and custom JSON parser for structured post-mortem formatting.
