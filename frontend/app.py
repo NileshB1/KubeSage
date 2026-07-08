@@ -272,7 +272,7 @@ def render_sidebar() -> None:
         st.markdown("### 📋 Navigation")
         page = st.radio(
             "Select Section",
-            ["🏠 Overview", "🔬 Investigation", "🔎 Search", "📊 Reports", "📈 Evaluation"],
+            ["🏠 Overview", "🔬 Investigation", "📊 Reports", "📈 Evaluation"],
             label_visibility="hidden",
         )
 
@@ -319,14 +319,12 @@ def render_overview() -> None:
         st.markdown("""
         <div class="kpi-card">
             <h1 style="color: #4ECDC4; margin: 0;">500</h1>
-
             <p style="margin: 0.5rem 0; font-size: 0.9rem;">Total Incidents</p>
         </div>
         """, unsafe_allow_html=True)
 
     with col2:
         st.markdown("""
-
         <div class="kpi-card">
             <h1 style="color: #FF6B6B; margin: 0;">7</h1>
             <p style="margin: 0.5rem 0; font-size: 0.9rem;">Incident Types</p>
@@ -337,7 +335,6 @@ def render_overview() -> None:
         st.markdown("""
         <div class="kpi-card">
             <h1 style="color: #45B7D1; margin: 0;">384</h1>
-
             <p style="margin: 0.5rem 0; font-size: 0.9rem;">Embedding Dim</p>
         </div>
         """, unsafe_allow_html=True)
@@ -346,7 +343,6 @@ def render_overview() -> None:
         st.markdown("""
         <div class="kpi-card">
             <h1 style="color: #FFEAA7; margin: 0;">93%</h1>
-
             <p style="margin: 0.5rem 0; font-size: 0.9rem;">Avg Confidence</p>
         </div>
         """, unsafe_allow_html=True)
@@ -856,11 +852,8 @@ def main() -> None:
 
     if page == "🏠 Overview":
         render_overview()
-    elif page == "Investigation":
+    elif page == "🔬 Investigation":
         render_investigation()
-
-    elif page == "🔎 Search":
-        render_search()
     elif page == "📊 Reports":
         render_reports()
     elif page == "📈 Evaluation":
