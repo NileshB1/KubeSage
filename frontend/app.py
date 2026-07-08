@@ -294,11 +294,6 @@ def render_sidebar() -> None:
         st.session_state.embedding_model = embedding_model
 
         st.markdown("---")
-
-        st.session_state.dark_mode = st.toggle("🌙 Dark Mode", value=True)
-
-        st.markdown("---")
-        st.caption("KubeSage v1.0.0 | NCI MSc Research")
         st.caption("Deep Learning & Generative AI")
 
 

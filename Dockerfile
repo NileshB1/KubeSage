@@ -1,5 +1,4 @@
 # KubeSage Docker Configuration
-# ===============================
 # FastAPI backend + Streamlit frontend + PostgreSQL
 
 FROM python:3.10-slim
@@ -22,7 +21,7 @@ RUN python -m pip install --upgrade pip setuptools wheel
 
 COPY requirements.txt .
 
-# Install CPU-only PyTorch first so sentence-transformers does not pull CUDA torch
+# Error while installing torch from requirements.txt hence pip install from docker file
 RUN pip install \
     --no-cache-dir \
     --default-timeout=1000 \

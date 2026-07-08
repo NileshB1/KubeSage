@@ -27,7 +27,7 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
-  # Streamlit frontend
+  #Streamlit frontend
   frontend:
     build: .
     container_name: kubesage-frontend
@@ -45,7 +45,7 @@ services:
       - ./results:/app/results
     restart: unless-stopped
 
-  # PostgreSQL database
+  #PostgreSQL database
   postgres:
     image: postgres:15-alpine
     container_name: kubesage-postgres
