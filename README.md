@@ -14,7 +14,7 @@ KubeSage uses historical incident context from a persistent vector store (Chroma
 - **6:** Local LLM Inference Wrapper: Done
 - **7:** RAG Pipeline Orchestrator: Done
 - **8:** Interactive Streamlit Dashboard Frontend: Done
-- **9:** Evaluation Metrics & Performance Benchmarks (Next)
+- **9:** Evaluation Metrics & Performance Benchmarks: Done
 
 ---
 
@@ -108,4 +108,19 @@ This stage introduces the graphical user interface for interacting with the back
 To run the Streamlit frontend locally:
 ```bash
 streamlit run frontend/app.py
+```
+
+---
+
+## 9: Evaluation Metrics & Performance Benchmarks
+This final stage incorporates metrics calculations, validation suites, and experiments:
+- `evaluation/metrics.py`: Computes Precision@K, Recall@K, Mean Reciprocal Rank (MRR), NDCG, and text similarity metrics (BLEU, ROUGE) to evaluate retrieval and generation quality.
+- `evaluation/experiments.py`: Defines the experiment execution suite for running performance ablation runs (comparing embedding models, Top-K settings, and hallucination rates).
+- `tests/test_evaluation.py`: Unit tests validating metrics calculations.
+- `tests/test_capture_substring_regression.py`: Automated regression tests preventing layout label collisions.
+
+### Running Evaluation Tests
+To run all verification suites:
+```bash
+pytest tests/test_evaluation.py tests/test_preprocessor.py tests/test_rag_pipeline.py tests/test_vector_db.py -v
 ```

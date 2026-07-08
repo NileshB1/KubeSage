@@ -1,0 +1,24 @@
+{
+  "report": {
+    "incident_id": "INC-XXXX",
+    "severity": "Critical",
+    "root_cause": "...",
+    "evidence": [
+      "...",
+      "..."
+    ],
+    "affected_services": [
+      "...",
+      "..."
+    ],
+    "confidence_score": 95.0,
+    "recommended_fixes": [
+      "...",
+      "..."
+    ],
+    "generated_summary": "...",
+    "alternative_causes": [],
+    "preventive_recommendations": []
+  },
+  "raw": "{ \"incident_id\": \"INC-XXXX\", \"severity\": \"Critical\", \"root_cause\": \"...\", \"evidence\": [\"...\", \"...\"], \"affected_services\": [\"...\", \"...\"], \"confidence_score\": 95, \"recommended_fixes\": [\"...\", \"...\"], \"generated_summary\": \"...\"}"
+}

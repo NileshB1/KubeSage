@@ -1,0 +1,238 @@
+name: Capture Dashboard Screenshots
+
+# Release-gate step:
+#   - On every PR that touches the dashboard frontend, the capture script,
+#     or this workflow file, a headless Chromium is launched against the live
+#     Streamlit app and a fixed list of expected PNGs is enforced.
+#   - Captured screenshots are uploaded as workflow artifacts even on failure
+#     so the partial run can be inspected during diagnosis.
+#
+# Expected-PNG list maintenance:
+#   The capture script produces all 9 sections in one Playwright pass. As
+#   `scripts/capture_screenshots.py` grows (new tabs / new pages), append the
+#   new PNG filename to EXPECTED_PNGS below to extend the contract. DO NOT
+#   loosen the contract by omitting steps; the release-gate fails the PR.
+#
+# Branch protection:
+#   This workflow only blocks PRs once it is added as a REQUIRED status check
+#   in GitHub > Settings > Branches > Branch protection rules for `main`.
+#   Without that step, a failing PR will show a red X but still be mergeable.
+
+on:
+  pull_request:
+    paths:
+      - 'frontend/**'
+      - 'scripts/capture_screenshots.py'
+      - 'requirements.txt'
+      - '.github/workflows/screenshots.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'frontend/**'
+      - 'scripts/capture_screenshots.py'
+      - 'requirements.txt'
+      - '.github/workflows/screenshots.yml'
+  workflow_dispatch:
+
+# Cancel any in-flight run for the same branch + event on a new commit.
+# Including ${{ github.event_name }} keeps workflow_dispatch and push runs
+# in separate groups so a manual re-trigger cannot cancel a real push run.
+concurrency:
+  group: screenshots-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  capture-screenshots:
+    name: Capture & gate screenshots
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    env:
+      EXPECTED_PNGS: |
+        docs/screenshots/01-overview.png
+        docs/screenshots/02-investigation-form.png
+        docs/screenshots/03-investigation-report.png
+        docs/screenshots/04-search-results.png
+        docs/screenshots/05-reports-dashboard.png
+        docs/screenshots/06-evaluation-retrieval.png
+        docs/screenshots/07-evaluation-generation.png
+        docs/screenshots/08-evaluation-hallucination.png
+        docs/screenshots/09-evaluation-per-sample.png
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+          cache-dependency-path: requirements.txt
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          # Pin Playwright to an exact version so the cache key below stays
+          # stable across runs. Bump deliberately when you want a refresh.
+          pip install 'playwright==1.40.0'
+
+      # Note: system-level Chromium deps (libgl, libnss3, libgbm, ...) are
+      # installed by `playwright install --with-deps chromium` below. Doing
+      # the apt-get explicitly is redundant and broke on Ubuntu 24.04 due to
+      # the libasound2 -> libasound2t64 package rename.
+
+      - name: Resolve Playwright version
+        id: pw-version
+        run: |
+          v=$(pip show playwright | awk '/^Version:/ {print $2}')
+          if [ -z "$v" ]; then
+            echo "::error::could not resolve playwright version; pip show returned empty"
+            exit 1
+          fi
+          echo "v=$v" >> "$GITHUB_OUTPUT"
+          echo "playwright=$v"
+
+      - name: Cache Playwright Chromium
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ steps.pw-version.outputs.v }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
+
+      - name: Install Playwright Chromium
+        run: playwright install --with-deps chromium
+
+      - name: Verify data prerequisites
+        run: |
+          # Placed BEFORE Wipe + Streamlit boot so a missing-data failure
+          # exits in seconds rather than after 30-60 s of wasted cold-compile.
+          # Catches: missing file, empty 0-byte file (corrupted clone), and
+          # empty directory (Chromadb index hasn't materialised).
+          missing=()
+          for f in data/synthetic_incidents.json \
+                   embeddings/incident_embeddings.npy; do
+            if [ ! -s "$f" ]; then
+              missing+=("$f")
+              if [ ! -e "$f" ]; then
+                echo "::error file=$f::missing"
+              else
+                echo "::error file=$f::present but empty (corrupted clone?)"
+              fi
+            fi
+          done
+          if [ ! -d vector_db/chroma_store ] || [ -z "$(ls -A vector_db/chroma_store 2>/dev/null)" ]; then
+            missing+=("vector_db/chroma_store/")
+            echo "::error file=vector_db/chroma_store::missing or empty"
+          fi
+          if [ "${#missing[@]}" -gt 0 ]; then
+            echo "::error::Run 'bash scripts/setup.sh' locally, then either commit the regenerated data/ + embeddings/ + vector_db/chroma_store/ artifacts, or force-add them if your .gitignore excludes them:  git add -f data/ embeddings/ vector_db/chroma_store/"
+            exit 1
+          fi
+          echo "data prerequisites OK"
+
+      - name: Wipe any stale screenshots from a prior run
+        run: |
+          # Without this, leftover PNGs from a previous successful run can
+          # satisfy the verify step's existence check even if the *current*
+          # capture script timed out before regenerating them, producing a
+          # false-green PR that masks the regression.
+          rm -f docs/screenshots/*.png
+          mkdir -p docs/screenshots
+          echo "stale PNGs wiped"
+
+      - name: Boot Streamlit (background)
+        run: |
+          mkdir -p logs
+          nohup python -m streamlit run frontend/app.py \
+            --server.port 8501 \
+            --server.headless true \
+            --server.address 127.0.0.1 \
+            --browser.gatherUsageStats false \
+            > logs/streamlit.log 2>&1 &
+          echo $! > /tmp/streamlit.pid
+          echo "streamlit PID=$(cat /tmp/streamlit.pid)"
+
+      - name: Wait for Streamlit health endpoint
+        run: |
+          python - <<'PY'
+          import sys, time, urllib.request
+          deadline = time.time() + 90  # 90 s cap; cold compile is 30-60 s
+          attempts = 0
+          while time.time() < deadline:
+              attempts += 1
+              try:
+                  with urllib.request.urlopen(
+                      'http://127.0.0.1:8501/_stcore/health', timeout=2
+                  ) as resp:
+                      if resp.status == 200 and resp.read().decode() == 'ok':
+                          print(f"streamlit UP after {attempts} probe(s)")
+                          sys.exit(0)
+              except Exception as e:
+                  print(f"  probe {attempts}: {e.__class__.__name__}", flush=True)
+              time.sleep(3)
+          print("ERROR: Streamlit never reported healthy within 90 s", file=sys.stderr)
+          sys.exit(2)
+          PY
+
+      - name: Run capture script
+        run: |
+          mkdir -p docs/screenshots
+          python scripts/capture_screenshots.py
+        env:
+          # Ensure the encoded-safe stdout path that the script already uses.
+          PYTHONIOENCODING: utf-8
+          PYTHONUTF8: '1'
+
+      - name: Stop Streamlit
+        if: always()
+        run: |
+          if [ -f /tmp/streamlit.pid ]; then
+            kill "$(cat /tmp/streamlit.pid)" 2>/dev/null || true
+            # Give it a moment to flush, then hard-kill if still alive.
+            sleep 2
+            kill -9 "$(cat /tmp/streamlit.pid)" 2>/dev/null || true
+          fi
+
+      - name: Verify expected PNGs exist
+        if: always()
+        run: |
+          set -euo pipefail
+          missing=()
+          while IFS= read -r f; do
+            [ -z "$f" ] && continue
+            if [ ! -f "$f" ]; then
+              missing+=("$f")
+              echo "::error file=$f::Expected PNG is missing"
+            else
+              bytes=$(wc -c < "$f")
+              echo "OK  $f  ($bytes bytes)"
+            fi
+          done <<< "$EXPECTED_PNGS"
+          if [ "${#missing[@]}" -gt 0 ]; then
+            echo "::error::Screenshot release-gate FAILED: ${#missing[@]} of $(echo "$EXPECTED_PNGS" | wc -l) expected PNG(s) missing"
+            exit 1
+          fi
+
+      - name: Upload screenshots as workflow artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dashboard-screenshots
+          path: docs/screenshots/*.png
+          retention-days: 14
+          if-no-files-found: error
+
+      - name: Upload Streamlit startup logs (diagnostic)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: streamlit-startup-logs
+          path: logs/streamlit.log
+          retention-days: 7
+          if-no-files-found: ignore

@@ -1,0 +1,79 @@
+{
+  "model": "HuggingFaceTB/SmolLM2-1.7B-Instruct",
+  "device": "CPU",
+  "num_samples": 5,
+  "total_time_s": 883.9,
+  "generation_metrics": {
+    "bleu": 0.143,
+    "rouge_l": 0.2857
+  },
+  "hallucination": {
+    "avg_faithfulness": 0.7655,
+    "hallucination_rate": 0.2345
+  },
+  "report_quality": {
+    "avg_completeness": 1.0
+  },
+  "per_sample": [
+    {
+      "incident_id": "INC-01000",
+      "incident_type": "CPUThrottling",
+      "severity": "Medium",
+      "gen_time_s": 180.2,
+      "completeness": 1.0,
+      "report_id": "INC-01000",
+      "report_severity": "Critical",
+      "report_confidence": 90.0,
+      "report_root_cause": "CPU limits set too low for actual workload",
+      "retrieved_count": 5
+    },
+    {
+      "incident_id": "INC-01001",
+      "incident_type": "ConnectionPoolExhaustion",
+      "severity": "Critical",
+      "gen_time_s": 166.1,
+      "completeness": 1.0,
+      "report_id": "INC-01070",
+      "report_severity": "Critical",
+      "report_confidence": 87.0,
+      "report_root_cause": "Network latency between application and database",
+      "retrieved_count": 5
+    },
+    {
+      "incident_id": "INC-01003",
+      "incident_type": "NetworkFailure",
+      "severity": "Critical",
+      "gen_time_s": 211.2,
+      "completeness": 1.0,
+      "report_id": "INC-01346",
+      "report_severity": "High",
+      "report_confidence": 89.0,
+      "report_root_cause": "Network partition between node groups",
+      "retrieved_count": 5
+    },
+    {
+      "incident_id": "INC-01004",
+      "incident_type": "ImagePullBackOff",
+      "severity": "Low",
+      "gen_time_s": 167.1,
+      "completeness": 1.0,
+      "report_id": "INC-01004",
+      "report_severity": "Low",
+      "report_confidence": 89.0,
+      "report_root_cause": "Registry authentication failure \u2014 missing imagePullSecret",
+      "retrieved_count": 5
+    },
+    {
+      "incident_id": "INC-01006",
+      "incident_type": "DNSFailure",
+      "severity": "Critical",
+      "gen_time_s": 159.3,
+      "completeness": 1.0,
+      "report_id": "INC-01006",
+      "report_severity": "Critical",
+      "report_confidence": 94.0,
+      "report_root_cause": "NetworkPolicy blocking DNS traffic (UDP port 53)",
+      "retrieved_count": 5
+    }
+  ]
+}

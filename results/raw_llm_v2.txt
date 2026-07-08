@@ -1,0 +1,1 @@
+{ "incident_id": "INC-XXXX", "severity": "Critical", "root_cause": "...", "evidence": ["...", "..."], "affected_services": ["...", "..."], "confidence_score": 95, "recommended_fixes": ["...", "..."], "generated_summary": "..."}
