@@ -13,8 +13,8 @@ KubeSage uses historical incident context from a persistent vector store (Chroma
 - **5:** Persistent Vector Store (ChromaDB Integration): Done
 - **6:** Local LLM Inference Wrapper: Done
 - **7:** RAG Pipeline Orchestrator: Done
-- **8:** Interactive Streamlit Dashboard Frontend (Next)
-- **9:** Evaluation Metrics & Performance Benchmarks
+- **8:** Interactive Streamlit Dashboard Frontend: Done
+- **9:** Evaluation Metrics & Performance Benchmarks (Next)
 
 ---
 
@@ -96,4 +96,16 @@ This stage bridges retrieval and generation components to form the end-to-end RA
 To run pipeline tests:
 ```bash
 pytest tests/test_rag_pipeline.py tests/test_vector_db.py -v
+```
+
+---
+
+## 8: Interactive Streamlit Dashboard Frontend
+This stage introduces the graphical user interface for interacting with the backend and RAG systems:
+- `frontend/app.py`: Streamlit-based web dashboard implementing page routing (Overview metrics, Incident Triage investigation portal, Semantic DB search logs, Saved Reports, and Evaluation statistics). Displays telemetry statistics using Plotly charts and custom dark theme settings.
+
+### Execution
+To run the Streamlit frontend locally:
+```bash
+streamlit run frontend/app.py
 ```
