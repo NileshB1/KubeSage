@@ -12,8 +12,8 @@ KubeSage uses historical incident context from a persistent vector store (Chroma
 - **4:** Sentence-Transformers Embedding Engine: Done
 - **5:** Persistent Vector Store (ChromaDB Integration): Done
 - **6:** Local LLM Inference Wrapper: Done
-- **7:** RAG Pipeline Orchestrator (Next)
-- **8:** Interactive Streamlit Dashboard Frontend
+- **7:** RAG Pipeline Orchestrator: Done
+- **8:** Interactive Streamlit Dashboard Frontend (Next)
 - **9:** Evaluation Metrics & Performance Benchmarks
 
 ---
@@ -84,3 +84,16 @@ python -m vector_db.build_index \
 ## 6: Local LLM Inference Wrapper
 This stage implements the local LLM inference manager to execute lightweight, open-weight instruction models on CPU:
 - `models/llm_inference.py`: Wraps HuggingFace transformers (`AutoModelForCausalLM` and `AutoTokenizer`) to load and query target models (e.g. `SmolLM2-1.7B-Instruct`). Features memory-optimized CPU float16 configuration fallback and custom JSON parser for structured post-mortem formatting.
+
+---
+
+## 7: RAG Pipeline Orchestrator
+This stage bridges retrieval and generation components to form the end-to-end RAG orchestrator:
+- `models/rag_pipeline.py`: Contains the `RAGPipeline` class coordinating vector search similarity retrieval, dynamic system/user prompt formatting with context interpolation, and JSON response post-processing.
+- `tests/test_rag_pipeline.py` & `tests/test_vector_db.py`: Unit tests verifying prompt rendering, retrieval logic, and orchestrator execution.
+
+### Running Tests
+To run pipeline tests:
+```bash
+pytest tests/test_rag_pipeline.py tests/test_vector_db.py -v
+```
