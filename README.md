@@ -10,8 +10,8 @@ KubeSage uses historical incident context from a persistent vector store (Chroma
 - **2:** Synthetic Kubernetes Incidents Generator: Done
 - **3:** Text Preprocessing & Cleaning pipeline: Done
 - **4:** Sentence-Transformers Embedding Engine: Done
-- **5:** Persistent Vector Store (ChromaDB Integration) (Next)
-- **6:** Local LLM Inference Wrapper
+- **5:** Persistent Vector Store (ChromaDB Integration): Done
+- **6:** Local LLM Inference Wrapper (Next)
 - **7:** RAG Pipeline Orchestrator
 - **8:** Interactive Streamlit Dashboard Frontend
 - **9:** Evaluation Metrics & Performance Benchmarks
@@ -61,4 +61,20 @@ To compute embeddings over the generated incidents:
 python embeddings/generate_embeddings.py \
     --input data/synthetic_incidents.json \
     --output embeddings/incident_embeddings.npy
+```
+
+---
+
+## 5: Persistent Vector Store (ChromaDB Integration)
+This stage sets up the storage layer for our vector database:
+- `vector_db/build_index.py`: Instantiates a persistent local client using ChromaDB. Handles custom schema indexing, collection management, similarity searches using cosine distance, and basic CRUD actions.
+- `vector_db/chroma_store/`: Persistent SQLite and HNSW index storage directory.
+
+### Execution
+To build the vector database from your embeddings and synthetic incidents:
+```bash
+python -m vector_db.build_index \
+    --embeddings embeddings/incident_embeddings.npy \
+    --incidents data/synthetic_incidents.json \
+    --model all-MiniLM-L6-v2
 ```
