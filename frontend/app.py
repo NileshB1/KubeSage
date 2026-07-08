@@ -360,7 +360,7 @@ def render_overview() -> None:
             color_discrete_sequence=px.colors.qualitative.Bold,  template=template,
         )
         fig.update_layout(showlegend=False, height=350)
-        st.plotly_chart(fig, width="stretch")
+        st.plotly_chart(fig, use_container_width=True)
 
     with col2:
         st.subheader("Severity Distribution")
@@ -368,7 +368,7 @@ def render_overview() -> None:
             values="Count", names="Severity",
             color_discrete_sequence=["#FF6B6B", "#E67E22", "#F1C40F", "#2ECC71"],  hole=0.4, template=template, )
         fig.update_layout(height=350)
-        st.plotly_chart(fig, width="stretch")
+        st.plotly_chart(fig, use_container_width=True)
 
     # System architecture
     #TODO Not showing architectute for now
@@ -420,7 +420,7 @@ def render_investigation() -> None:
 
         investigate_btn = st.button(
             "🔍 Investigate Incident", type="primary",
-            width="stretch",disabled=(len(incident_text.strip()) < 10),
+            use_container_width=True,disabled=(len(incident_text.strip()) < 10),
         )
 
     #Run pipeline on click
@@ -487,17 +487,17 @@ def render_investigation() -> None:
         with col1:
             st.download_button("📥 Download JSON",
                 data=json.dumps(report, indent=2, default=str),   file_name=f"{report.get('incident_id', 'report')}.json",
-                mime="application/json", width="stretch",)
+                mime="application/json", use_container_width=True,)
         with col2:
             txt = ReportParser.format_for_display(report)
             st.download_button(
                 "📄 Download Report (TXT)",
                 data=txt,  file_name=f"{report.get('incident_id', 'report')}.txt",
-                mime="text/plain", width="stretch",
+                mime="text/plain", use_container_width=True,
                 help="Plain-text export. (True PDF requires optional reportlab.)",
             )
         with col3:
-            if st.button("📤 Copy JSON to clipboard", width="stretch"):
+            if st.button("📤 Copy JSON to clipboard", use_container_width=True):
                 st.code(json.dumps(report, indent=2, default=str), language="json")
     elif results and "error" in results.get("report", {}):
         st.markdown("---")
@@ -543,7 +543,7 @@ def render_search() -> None:
         top_k = st.select_slider("Top K",  options=[3, 5, 10, 20],
             value=st.session_state.get("top_k", 5),
         )
-        submitted = st.form_submit_button("🔎 Search", type="primary", width="stretch")
+        submitted = st.form_submit_button("🔎 Search", type="primary", use_container_width=True)
 
     if submitted and search_query.strip():
         try:
@@ -650,7 +650,7 @@ def render_reports() -> None:
                 "Root Cause": (m.get("root_cause") or "")[:120],
             })
         if rows:
-            st.dataframe(pd.DataFrame(rows), width="stretch", hide_index=True)
+            st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
         else:
             st.info(f"No incidents of type `{selected_type}` in the current snapshot. "
                 "Try a different type or clear the filter.")
@@ -676,7 +676,7 @@ def render_reports() -> None:
         if not type_df.empty:
             fig = px.bar(type_df, x="Type", y="Count", color="Type", template=template)
             fig.update_layout(showlegend=False, height=350)
-            st.plotly_chart(fig, width="stretch")
+            st.plotly_chart(fig, use_container_width=True)
 
     with col2:
         st.subheader("Severity distribution")
@@ -694,7 +694,7 @@ def render_reports() -> None:
                 hole=0.4, template=template,
             )
             fig.update_layout(height=350)
-            st.plotly_chart(fig, width="stretch")
+            st.plotly_chart(fig, use_container_width=True)
 
 
 def render_evaluation() -> None:
@@ -754,7 +754,7 @@ def render_evaluation() -> None:
                 chart_df, x="K", y="Score", color="Metric",
                 barmode="group", template=template,
             )
-            st.plotly_chart(fig, width="stretch")
+            st.plotly_chart(fig, use_container_width=True)
             st.caption(
                 f"Source: `results/retrieval_eval_results.json` - "
                 f"{retrieval_j.get('num_queries', '?')} queries, "
@@ -836,7 +836,7 @@ def render_evaluation() -> None:
                 styled_df = df
             st.dataframe(
                 styled_df,
-                width="stretch",
+                use_container_width=True,
                 hide_index=True,
             )
         else:
