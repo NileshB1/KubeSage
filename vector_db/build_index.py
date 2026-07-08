@@ -22,6 +22,13 @@ from chromadb.config import Settings as ChromaSettings
 from backend.config import settings
 from backend.logging_config import get_logger
 
+# Monkeypatch ChromaDB telemetry to prevent console warnings/errors
+try:
+    import chromadb.telemetry.product.posthog
+    chromadb.telemetry.product.posthog.Posthog.capture = lambda *args, **kwargs: None
+except Exception:
+    pass
+
 logger = get_logger(__name__)
 
 
