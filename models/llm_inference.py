@@ -1,9 +1,6 @@
 """
-KubeSage LLM Generator
-======================
-Manages local text generation via HuggingFace transformers.
-Tailored for low-resource CPU execution with models in the 1B-4B parameter range 
-(specifically HuggingFaceTB/SmolLM2-1.7B-Instruct).
+
+Manages local text generation via HuggingFace transformers
 """
 
 import sys
@@ -19,6 +16,7 @@ if str(_PROJECT_ROOT) not in sys.path:
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
+
 from backend.config import settings
 from backend.logging_config import get_logger
 
@@ -29,14 +27,6 @@ class LLMGenerator:
     """
     LLM generator using HuggingFace transformers pipeline.
 
-    Loads a small instruction-tuned model for CPU inference.
-    Generates structured JSON incident reports from RAG prompts.
-
-    Attributes:
-        model: Loaded HuggingFace causal LM.
-        tokenizer: Associated tokenizer.
-        model_name: Name of the loaded model.
-        device: Device string (cpu/cuda).
     """
 
     def __init__(
@@ -45,11 +35,7 @@ class LLMGenerator:
         device: str | None = None,
     ) -> None:
         """
-        Initialize the LLM generator.
-
-        Args:
-            model_name: HuggingFace model ID. Defaults to config.
-            device: Device for inference. Defaults to config.
+        Initialize the LLM generator
         """
         self.model_name = model_name or settings.LLM_MODEL_NAME
         self.device = device or settings.LLM_DEVICE
@@ -62,8 +48,7 @@ class LLMGenerator:
             trust_remote_code=True,
         )
 
-        # Load model with CPU optimizations
-        # Use float16 as primary dtype for CPU (halves memory, minimal quality loss)
+        # Load model with CPU optimizations. Use float16 as primary dtype for CPU (halves memory, minimal quality loss)
         load_kwargs: dict[str, Any] = {
             "trust_remote_code": True,
             "torch_dtype": torch.float16,
@@ -74,20 +59,21 @@ class LLMGenerator:
         else:
             load_kwargs["low_cpu_mem_usage"] = True
 
-        # Try float16 first (CPU-friendly), fall back to float32
+
         try:
             self.model = AutoModelForCausalLM.from_pretrained(
                 self.model_name, **load_kwargs,
             )
         except Exception as e:
-            logger.warning(f"float16 load failed: {e}. Trying float32...")
+            logger.warning(f"float16 load failed: {e}. Trying float32....ha ha")
+
             load_kwargs["torch_dtype"] = torch.float32
             try:
                 self.model = AutoModelForCausalLM.from_pretrained(
                     self.model_name, **load_kwargs,
                 )
             except Exception as e2:
-                logger.error(f"Both float16 and float32 loads failed: {e2}")
+                logger.error(f"Exception occureed, both float16 and float32 loads failed: {e2}")
                 raise RuntimeError(
                     f"Failed to load model {self.model_name}: {e2}"
                 ) from e2
@@ -104,7 +90,7 @@ class LLMGenerator:
                     self.model = torch.quantization.quantize_dynamic(
                         self.model, {torch.nn.Linear}, dtype=torch.qint8,
                     )
-                    logger.info("Applied dynamic quantization (LLM_LOAD_IN_8BIT=true)")
+                    logger.info(f"applied dynamic quantization ")
                 except Exception as e:
                     logger.warning(f"Dynamic quantization failed (model may not support it): {e}")
 
@@ -113,24 +99,12 @@ class LLMGenerator:
         params_m = sum(p.numel() for p in self.model.parameters()) / 1e6
         logger.info(f"LLM loaded: {params_m:.0f}M parameters | Device: {self.device}")
 
-    # -------------------------------------------------------------------
+
     # Chat Prompt Building
-    # -------------------------------------------------------------------
 
     def _build_chat_prompt(self, system: str, user: str) -> str:
         """
-        Build a chat-format prompt using the model's native template.
-
-        Uses tokenizer.apply_chat_template() for correct BOS tokens,
-        special token placement, and model-specific formatting.
-        Falls back to ChatML if the tokenizer lacks a chat_template.
-
-        Args:
-            system: System prompt string.
-            user: User prompt string.
-
-        Returns:
-            Formatted prompt string (with add_generation_prompt=True).
+        Build a chat-format prompt using the model's native template
         """
         messages = [
             {"role": "system", "content": system},
@@ -145,7 +119,7 @@ class LLMGenerator:
         except (AttributeError, ValueError, KeyError):
             # Fallback to ChatML if tokenizer has no chat_template
             logger.debug(
-                "apply_chat_template unavailable; falling back to ChatML"
+                f"apply_chat_template unavailable; falling back to ChatML"
             )
             return (
                 f"<|im_start|>system\n{system}<|im_end|>\n"
@@ -153,9 +127,6 @@ class LLMGenerator:
                 f"<|im_start|>assistant\n"
             )
 
-    # -------------------------------------------------------------------
-    # Core generation (private, shared by generate and generate_json)
-    # -------------------------------------------------------------------
 
     def _generate_impl(
         self,
@@ -165,16 +136,7 @@ class LLMGenerator:
         temperature: float | None = None,
     ) -> str:
         """
-        Core generation logic shared by generate() and generate_json().
-
-        Args:
-            prompt: Full tokenized prompt string (including chat template).
-            prefix: String to prepend to the decoded output.
-            max_tokens: Max tokens to generate.
-            temperature: Sampling temperature.
-
-        Returns:
-            Generated text (prefix + decoded new tokens, stripped).
+        Core generation logic shared by generate() and generate_json()
         """
         max_tokens = max_tokens or settings.LLM_MAX_TOKENS
         temperature = temperature or settings.LLM_TEMPERATURE
@@ -187,11 +149,9 @@ class LLMGenerator:
         with torch.no_grad():
             outputs = self.model.generate(
                 **inputs,
-                max_new_tokens=max_tokens,
-                temperature=temperature,
+                max_new_tokens=max_tokens,  temperature=temperature,
                 do_sample=(temperature > 0),
-                pad_token_id=self.tokenizer.eos_token_id,
-                eos_token_id=self.tokenizer.eos_token_id,
+                pad_token_id=self.tokenizer.eos_token_id,  eos_token_id=self.tokenizer.eos_token_id,
             )
 
         elapsed = time.time() - start_time
@@ -204,28 +164,16 @@ class LLMGenerator:
 
         return response.strip()
 
-    # -------------------------------------------------------------------
+
     # Public generation methods
-    # -------------------------------------------------------------------
 
     def generate(
         self,
-        system_prompt: str,
-        user_prompt: str,
-        max_tokens: int | None = None,
-        temperature: float | None = None,
+        system_prompt: str,   user_prompt: str,
+        max_tokens: int | None = None,  temperature: float | None = None,
     ) -> str:
         """
-        Generate free-form text using the loaded LLM.
-
-        Args:
-            system_prompt: System-level instructions.
-            user_prompt: User-level query with context.
-            max_tokens: Max tokens to generate.
-            temperature: Sampling temperature.
-
-        Returns:
-            Generated text response.
+        Generate free-form text using the loaded LLM
         """
         prompt = self._build_chat_prompt(system_prompt, user_prompt)
         return self._generate_impl(prompt, max_tokens=max_tokens, temperature=temperature)
@@ -233,27 +181,11 @@ class LLMGenerator:
     def generate_json(
         self,
         system_prompt: str,
-        user_prompt: str,
-        json_start: str = "{",
-        max_tokens: int | None = None,
-        temperature: float | None = None,
+        user_prompt: str,    json_start: str = "{",
+        max_tokens: int | None = None,tmperature: float | None = None,
     ) -> str:
         """
-        Generate a JSON response by pre-filling the assistant response.
-
-        Forces structured JSON output by starting the assistant's
-        response with json_start (default: '{'). The returned string
-        has the prefix prepended for complete JSON parsing.
-
-        Args:
-            system_prompt: System-level instructions.
-            user_prompt: User-level query with context.
-            json_start: String to pre-fill the assistant response.
-            max_tokens: Max tokens to generate.
-            temperature: Sampling temperature.
-
-        Returns:
-            Generated text including the pre-filled prefix.
+        Generate a JSON response by pre-filling the assistant response
         """
         prompt = self._build_chat_prompt(system_prompt, user_prompt) + json_start
         return self._generate_impl(prompt, prefix=json_start, max_tokens=max_tokens, temperature=temperature)
@@ -261,27 +193,17 @@ class LLMGenerator:
     def generate_batch(
         self,
         prompts: list[dict[str, str]],
-        max_tokens: int | None = None,
-        json_mode: bool = False,
-    ) -> list[str]:
+        max_tokens: int | None = None, json_mode: bool = False,
+    ):
         """
-        Generate text for multiple prompts sequentially.
-
-        Args:
-            prompts: List of dicts with 'system' and 'user' keys.
-            max_tokens: Max tokens per generation.
-            json_mode: If True, use generate_json (pre-fills '{').
-
-        Returns:
-            List of generated text responses.
+        Generate text for multiple prompts sequentially
         """
         method = self.generate_json if json_mode else self.generate
         responses: list[str] = []
         for i, prompt in enumerate(prompts):
-            logger.info(f"Generating {i+1}/{len(prompts)}...")
+            logger.info(f"Generating: {i+1}/{len(prompts)}....")
             responses.append(method(
-                system_prompt=prompt["system"],
-                user_prompt=prompt["user"],
+                system_prompt=prompt["system"],user_prompt=prompt["user"],
                 max_tokens=max_tokens,
             ))
         return responses
