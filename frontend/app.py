@@ -25,8 +25,8 @@ from models.rag_pipeline import RAGPipeline, ReportParser
 
 #page config should be first streamlit command
 st.set_page_config(
-    page_title="KubeSage - Incident Analysis",
-    page_icon="",layout="wide", initial_sidebar_state="expanded",)
+    page_title="KubeSage: Incident Analysis",
+    page_icon="",layout="wide", initial_sidebar_state="expanded")
 
 
 # Session State Initialization
@@ -264,7 +264,7 @@ def render_sidebar() -> None:
             "https://img.icons8.com/?size=100&id=33049&format=png",
             width=60,
         )
-        st.title("KubeSage 🔍")
+        st.title("KubeSage")
 
         st.markdown("---")
 
