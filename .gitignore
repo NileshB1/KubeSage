@@ -45,6 +45,9 @@ logs/
 nltk_data/
 .cache/
 
+#Added ".github" folder to ignotre workflows
+.github
+
 # Tmp / debug probes
 /tmp/
 
