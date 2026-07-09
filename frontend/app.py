@@ -26,7 +26,7 @@ from models.rag_pipeline import RAGPipeline, ReportParser
 #page config should be first streamlit command
 st.set_page_config(
     page_title="KubeSage - Incident Analysis",
-    page_icon="🔍",layout="wide", initial_sidebar_state="expanded",)
+    page_icon="",layout="wide", initial_sidebar_state="expanded",)
 
 
 # Session State Initialization
@@ -37,7 +37,7 @@ def init_session_state() -> None:
     defaults: dict[str, Any] = {
         "incidents": [], "reports": [],
         "embedding_model": "all-MiniLM-L6-v2",  "rag_enabled": True,
-        "top_k": 5, "dark_mode": True,  "_theme_sig": None, 
+        "top_k": 5, "dark_mode": False,  "_theme_sig": None, 
     }
     for key, value in defaults.items():
         if key not in st.session_state:
@@ -165,7 +165,7 @@ def get_dark_css(is_dark: bool):
 def apply_dark_mode() -> None:
     """Inject dark/light CSS via cached strin
     """
-    dark_mode = st.session_state.get("dark_mode", True)
+    dark_mode = st.session_state.get("dark_mode", False)
     sig = ("dark",) if dark_mode else ("light",)
     if st.session_state.get("_theme_sig") != sig:
         st.markdown(get_dark_css(dark_mode), unsafe_allow_html=True)
