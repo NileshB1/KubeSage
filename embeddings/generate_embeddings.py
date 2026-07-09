@@ -65,8 +65,7 @@ class EmbeddingGenerator:
         embeddings = self.model.encode(
             texts,  batch_size=batch_size,    show_progress_bar=show_progress,
             normalize_embeddings=True,  # Normalize for cosine similarity
-            convert_to_numpy=True,
-        )
+            convert_to_numpy=True)
 
         elapsed = time.time() - start
         embeds_per_sec = len(texts) / elapsed
@@ -81,11 +80,7 @@ class EmbeddingGenerator:
         """
         Generate embedding for a single text query
         """
-        embedding = self.model.encode(
-            [text],
-            normalize_embeddings=True,
-            convert_to_numpy=True,
-        )
+        embedding = self.model.encode([text],normalize_embeddings=True,convert_to_numpy=True)
         return embedding[0]
 
 
