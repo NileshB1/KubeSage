@@ -304,66 +304,89 @@ def render_sidebar() -> None:
 # Pages
 
 def render_overview() -> None:
-    """Render the overview dashboard page"""
+    """Render the Overview tab with dynamic database statistics."""
     st.header("🏠 Incident Overview Dashboard")
-
-    # KPI Cards (static HTML, no caching needed)
+    stats = get_vector_stats()
+    
+    # KPI Cards
     col1, col2, col3, col4 = st.columns(4)
 
     with col1:
-        st.markdown("""
+        st.markdown(f"""
         <div class="kpi-card">
-            <h1 style="color: #4ECDC4; margin: 0;">500</h1>
+            <h1 style="color: #4ECDC4; margin: 0;">{stats["total"]}</h1>
             <p style="margin: 0.5rem 0; font-size: 0.9rem;">Total Incidents</p>
         </div>
         """, unsafe_allow_html=True)
 
     with col2:
-        st.markdown("""
+        st.markdown(f"""
         <div class="kpi-card">
-            <h1 style="color: #FF6B6B; margin: 0;">7</h1>
+            <h1 style="color: #FF6B6B; margin: 0;">{len(stats["by_type"])}</h1>
             <p style="margin: 0.5rem 0; font-size: 0.9rem;">Incident Types</p>
         </div>
         """, unsafe_allow_html=True)
 
+    vdb = get_vector_db()
+    emb_dim = vdb.embedding_dim if vdb else 384
     with col3:
-        st.markdown("""
+        st.markdown(f"""
         <div class="kpi-card">
-            <h1 style="color: #45B7D1; margin: 0;">384</h1>
+            <h1 style="color: #45B7D1; margin: 0;">{emb_dim}</h1>
             <p style="margin: 0.5rem 0; font-size: 0.9rem;">Embedding Dim</p>
         </div>
         """, unsafe_allow_html=True)
 
+    saved_reports = st.session_state.get("reports", [])
+    if saved_reports:
+        conf_sum = sum(float(r.get("confidence", 91.0)) for r in saved_reports)
+        avg_conf = conf_sum / len(saved_reports)
+    else:
+        avg_conf = 91.2
+        
     with col4:
-        st.markdown("""
+        st.markdown(f"""
         <div class="kpi-card">
-            <h1 style="color: #FFEAA7; margin: 0;">93%</h1>
+            <h1 style="color: #FFEAA7; margin: 0;">{avg_conf:.1f}%</h1>
             <p style="margin: 0.5rem 0; font-size: 0.9rem;">Avg Confidence</p>
         </div>
         """, unsafe_allow_html=True)
 
-    #Charts
-    type_data, sev_data = get_static_chart_data()
+    # Charts
     template = "plotly_dark" if st.session_state.dark_mode else "plotly_white"
-
     col1, col2 = st.columns(2)
 
     with col1:
         st.subheader("Incident Distribution by Type")
-        fig = px.bar(
-            type_data,  x="Type", y="Count", color="Type",
-            color_discrete_sequence=px.colors.qualitative.Bold,  template=template,
-        )
-        fig.update_layout(showlegend=False, height=350)
-        st.plotly_chart(fig, use_container_width=True)
+        type_df = pd.DataFrame([
+            {"Type": t, "Count": c}
+            for t, c in sorted(stats["by_type"].items(), key=lambda kv: -kv[1])
+        ])
+        if not type_df.empty:
+            fig = px.bar(
+                type_df, x="Type", y="Count", color="Type",
+                color_discrete_sequence=px.colors.qualitative.Bold, template=template,
+            )
+            fig.update_layout(showlegend=False, height=350)
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.info("No distribution data available.")
 
     with col2:
         st.subheader("Severity Distribution")
-        fig = px.pie(sev_data,
-            values="Count", names="Severity",
-            color_discrete_sequence=["#FF6B6B", "#E67E22", "#F1C40F", "#2ECC71"],  hole=0.4, template=template, )
-        fig.update_layout(height=350)
-        st.plotly_chart(fig, use_container_width=True)
+        sev_df = pd.DataFrame([
+            {"Severity": s, "Count": c}
+            for s, c in stats["by_severity"].items()
+        ])
+        if not sev_df.empty:
+            fig = px.pie(
+                sev_df, values="Count", names="Severity",
+                color_discrete_sequence=["#FF6B6B", "#E67E22", "#F1C40F", "#2ECC71"], hole=0.4, template=template,
+            )
+            fig.update_layout(height=350)
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.info("No severity data available.")
 
     # System architecture
     #TODO Not showing architectute for now
