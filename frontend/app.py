@@ -766,11 +766,7 @@ def render_evaluation() -> None:
 
     template = "plotly_dark" if st.session_state.dark_mode else "plotly_white"
 
-    tab1, tab2, tab3, tab4 = st.tabs(["📊 Retrieval Metrics", "📝 Generation Quality", "🎯 Hallucination",
-        "📋 Per-Sample Detail",])
-
-    #tab 1: Retrieval metrics
-    with tab1:
+    if experiment == "Experiment 1: Retrieval @ K (Precision / Recall / MRR / NDCG)":
         st.subheader("Retrieval Performance - real eval")
         if retrieval_j and "metrics" in retrieval_j:
             m = retrieval_j["metrics"]
@@ -788,11 +784,8 @@ def render_evaluation() -> None:
             for k in retrieval_j.get("k_values", [1, 3, 5, 10]):
                 rows.append({"K": f"@{k}", "Metric": "Precision",
                              "Score": m["precision"].get(f"@{k}", 0)})
-                
-                ##TODO Need to test this row, not wrking           
                 rows.append({"K": f"@{k}", "Metric": "Recall",
                              "Score": m["recall"].get(f"@{k}", 0)})
-
                 rows.append({"K": f"@{k}", "Metric": "NDCG",
                              "Score": m["ndcg"].get(f"@{k}", 0)})
             chart_df = pd.DataFrame(rows)
@@ -809,8 +802,7 @@ def render_evaluation() -> None:
         else:
             st.info("retrieval metrics not available....")
 
-    #Tab 2: generation quality
-    with tab2:
+    elif experiment == "Experiment 2: Generation Quality (BLEU, ROUGE-L)":
         st.subheader("Report Generation Quality - real eval (n=5)")
         if generation_j:
             gm = generation_j.get("generation_metrics", {})
@@ -829,15 +821,13 @@ def render_evaluation() -> None:
             st.caption(
                 f"Model: `{generation_j.get('model', '?')}` on "
                 f"{generation_j.get('device', '?')} . "
-
                 f"{generation_j.get('num_samples', '?')} samples . "
                 f"{generation_j.get('total_time_s', 0):.0f}s total."
             )
         else:
             st.info("Generation metrics not available........")
 
-    #Tab 3: Hallucination
-    with tab3:
+    elif experiment == "Experiment 3: Hallucination (Faithfulness)":
         st.subheader("Hallucination Analysis: real eval")
         if generation_j and "hallucination" in generation_j:
             hh = generation_j["hallucination"]
@@ -854,7 +844,6 @@ def render_evaluation() -> None:
                 f"{(1 - hh.get('hallucination_rate', 0)) * 100:.1f}% of generated "
                 f"claims could be attributed to retrieved source documents."
             )
-
             st.caption(
                 "Method: SBERT cosine-similarity > 0.5 between generated claim "
                 "and any retrieved chunk (sentence_transformers `all-MiniLM-L6-v2`)."
@@ -862,8 +851,7 @@ def render_evaluation() -> None:
         else:
             st.info("Hallucination metrics not available.")
 
-    #Tab 4: Per-sample
-    with tab4:
+    elif experiment == "Experiment 4: Per-Sample Real Eval (n=5, SmolLM2-1.7B)":
         st.subheader("Per-Sample Eval Detail - SmolLM2-1.7B-Instruct on CPU")
         if generation_j and "per_sample" in generation_j:
             ps = generation_j["per_sample"]
