@@ -138,7 +138,7 @@ class ExperimentRunner:
         """
         Quantify hallucination rates in generated reports
         """
-        logger.info(f"Running Experiment 5: hallucination analysis")
+        logger.info(f"#### Running Experiment 5: hallucination analysis")
         start = time.time()
 
         faithfulness_scores=[]

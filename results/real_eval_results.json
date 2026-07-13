@@ -60,7 +60,7 @@
       "report_id": "INC-01004",
       "report_severity": "Low",
       "report_confidence": 89.0,
-      "report_root_cause": "Registry authentication failure \u2014 missing imagePullSecret",
+      "report_root_cause": "Registry authentication failure,  missing imagePullSecret",
       "retrieved_count": 5
     },
     {

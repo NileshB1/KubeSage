@@ -48,7 +48,7 @@ INCIDENT_TEMPLATES: list[dict[str, Any]] = [
             "oom-kill:constraint=CONSTRAINT_MEMCG",
         ],
         "root_causes": [
-            "Memory leak in application code — unbounded data structure growth",
+            "Memory leak in application code - unbounded data structure growth",
             "Insufficient memory limits configured for workload. Sudden traffic spike causing increased memory allocation",
             "Third-party library memory leak under concurrent requests. Unoptimized database query loading entire result set into memory",
         ],
@@ -113,7 +113,7 @@ INCIDENT_TEMPLATES: list[dict[str, Any]] = [
             "manifest for {image_name} not found",
         ],
         "root_causes": [
-            "Incorrect image tag specified in deployment manifest",  "Registry authentication failure — missing imagePullSecret",
+            "Incorrect image tag specified in deployment manifest",  "Registry authentication failure - missing imagePullSecret",
             "Docker registry rate limit exceeded",
             "Image does not exist in the specified registry",    "Network connectivity issue to container registry",
         ],
@@ -143,14 +143,14 @@ INCIDENT_TEMPLATES: list[dict[str, Any]] = [
             "Cannot acquire connection from pool within {timeout}s",   "Connection pool size {pool_size} exceeded for {db_name}",
         ],
         "root_causes": [
-            "Connection leak — connections not returned to pool after use",
+            "Connection leak - connections not returned to pool after use",
             "Sudden traffic spike to service causing pool saturation",     "Slow database queries causing connections to be held open",
-            "Pool size misconfiguration — pool too small for workload", "Network latency between application and database",
+            "Pool size misconfiguration - pool too small for workload", "Network latency between application and database",
         ],
         "resolutions": [
             "Increased connection pool size from {old_pool} to {new_pool}",
             "Fixed connection leak by ensuring connections closed in finally blocks",
-            "Added PgBouncer connection pooler in front of PostgreSQL", "Optimized slow queries — 10x improvement in response time",
+            "Added PgBouncer connection pooler in front of PostgreSQL", "Optimized slow queries - 10x improvement in response time",
             "Implemented read replicas to distribute read load",
         ],
         "services": ["payment-service", "order-service", "user-service", "inventory-api"],
@@ -179,7 +179,7 @@ INCIDENT_TEMPLATES: list[dict[str, Any]] = [
         ],
         "resolutions": [
             "Scaled CoreDNS deployment to {replicas} replicas",   "Updated NetworkPolicy to allow UDP 53 traffic to kube-dns",
-            "Fixed CoreDNS ConfigMap — added missing stub domain",
+            "Fixed CoreDNS ConfigMap - added missing stub domain",
             "Flushed node DNS cache and restarted CoreDNS pods",  "Set ndots:2 in pod spec to reduce DNS query volume",
         ],
         "services": ["all-services", "api-gateway", "service-mesh"],
@@ -209,7 +209,7 @@ INCIDENT_TEMPLATES: list[dict[str, Any]] = [
         ],
         "resolutions": [
             "Increased CPU limit from {old_limit} to {new_limit} cores",
-            "Optimized hot code path — 40% reduction in CPU usage", "Configured HPA with CPU utilization target of 70%",
+            "Optimized hot code path - 40% reduction in CPU usage", "Configured HPA with CPU utilization target of 70%",
             "Reduced sidecar CPU request and added resource quotas", "Tuned JVM GC settings (G1GC, MaxGCPauseMillis=200)",
         ],
         "services": ["payment-processor", "data-analytics", "ml-inference", "report-generator"],
