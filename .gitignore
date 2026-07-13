@@ -51,8 +51,6 @@ nltk_data/
 # Tmp / debug probes
 /tmp/
 
-# Backups
+#Backups
 vector_db/chroma_store_backup/
 
-# MSc Research Report Word document
-KubeSage_MSc_Research_Report.docx
