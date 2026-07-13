@@ -394,43 +394,40 @@ def render_overview() -> None:
     ##st.subheader("System Architecture")
     ##st.markdown("""
     ##```
-    ##Data Sources → Preprocessing → Embeddings → ChromaDB → Search → RAG → LLM → Report
+    ##Data Sources -> Preprocessing -> Embeddings -> ChromaDB -> Search -> RAG -> LLM -> Report
     ##```
     ##""")
 
-    """
-    
-    #Report:Temporary code to create pie chart for report (TODO remove code at the end)
-    # Report: Fig. 4. Final balanced class distribution of the KubeSage incident database.
-    import matplotlib.pyplot as plt
-
-    # Data
-    labels = [
-        "DNSFailure",  "CPUThrottling", "ImagePullBackOff", "CrashLoopBackOff",
-        "OOMKilled",  "ConnectionPool\nExhaustion",  "NetworkFailure",
-    ]
-    sizes = [11.8, 13.4, 13.6, 14.2, 14.2, 16.2, 16.6]
-    colors = ["#16A085", "#8E44AD", "#3498DB", "#2ECC71", "#F1C40F", "#E67E22", "#E74C3C"]
-
-    #st.title("Synthetic Dataset: Incident Type Distribution")
-
-    fig, ax = plt.subplots(figsize=(3, 3))
-
-    ax.pie(
-        sizes, labels=labels,
-        colors=colors, autopct="%1.1f%%", startangle=90,  # start at 12 o'clock
-        counterclock=False, # go clockwise, matching original figure
-        wedgeprops={"edgecolor": "white", "linewidth": 1},
-        textprops={"fontsize": 5.5},    pctdistance=0.75,
-    )
-
-    ax.set_title("Synthetic Dataset: Incident Type Distribution\n(500 Total Incidents)", fontsize=5, fontweight="bold")
-    ax.axis("equal")  # keep it a circle
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        st.pyplot(fig, use_container_width=True)
-    st.caption("Fig. 4. Final balanced class distribution of the KubeSage incident database")
-    """
+    # #Report:Temporary code to create pie chart for report (TODO remove code at the end)
+    # # Report: Fig. 4. Final balanced class distribution of the KubeSage incident database.
+    # import matplotlib.pyplot as plt
+    # 
+    # # Data
+    # labels = [
+    #     "DNSFailure",  "CPUThrottling", "ImagePullBackOff", "CrashLoopBackOff",
+    #     "OOMKilled",  "ConnectionPool\nExhaustion",  "NetworkFailure",
+    # ]
+    # sizes = [11.8, 13.4, 13.6, 14.2, 14.2, 16.2, 16.6]
+    # colors = ["#16A085", "#8E44AD", "#3498DB", "#2ECC71", "#F1C40F", "#E67E22", "#E74C3C"]
+    # 
+    # #st.title("Synthetic Dataset: Incident Type Distribution")
+    # 
+    # fig, ax = plt.subplots(figsize=(3, 3))
+    # 
+    # ax.pie(
+    #     sizes, labels=labels,
+    #     colors=colors, autopct="%1.1f%%", startangle=90,  # start at 12 o'clock
+    #     counterclock=False, # go clockwise, matching original figure
+    #     wedgeprops={"edgecolor": "white", "linewidth": 1},
+    #     textprops={"fontsize": 5.5},    pctdistance=0.75,
+    # )
+    # 
+    # ax.set_title("Synthetic Dataset: Incident Type Distribution\n(500 Total Incidents)", fontsize=5, fontweight="bold")
+    # ax.axis("equal")  # keep it a circle
+    # col1, col2, col3 = st.columns([1, 2, 1])
+    # with col2:
+    #     st.pyplot(fig, use_container_width=True)
+    # st.caption("Fig. 4. Final balanced class distribution of the KubeSage incident database")
 
 
 def render_investigation() -> None:
